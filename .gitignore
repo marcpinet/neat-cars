@@ -1,0 +1,5 @@
+# Auto-generated folders
+.git/
+.vscode/
+.env/
+__pycache__/
