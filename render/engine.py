@@ -37,7 +37,7 @@ class Engine:
         self.is_placing_start_point = False
         self.ai_can_start = False
         self.instructions = [
-            "Left click to draw a black line, right click to draw a white line. Once you are done drawing, press SPACE to go to the next step.",
+            "Left click to draw a black line, right click to draw a white line. Mouse wheel to adjust brush size. Once you are done drawing, press SPACE to go to the next step.",
             "Use the directional arrows to rotate. Click to place. CTRL + Z to go back to drawing. Once you've placed the start point, the AI will automatically start running.",
         ]
         self.instruction_index = 0
@@ -98,6 +98,17 @@ class Engine:
                             self.is_placing_start_point = False
                             self.instruction_index -= 1
                             self.is_drawing_track = True
+
+                # Handle scroll brush size
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 4:
+                        # Ensure doesn't go above 100
+                        if Engine.BRUSH_SIZE < 100:
+                            Engine.BRUSH_SIZE += 1
+                    elif event.button == 5:
+                        # Ensure doesn't go below 1
+                        if Engine.BRUSH_SIZE > 10:
+                            Engine.BRUSH_SIZE -= 1
      
             # Draw instructions
             self.draw_instructions()
