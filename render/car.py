@@ -46,7 +46,6 @@ class Car:
         # Assigning the current sprite to this variable sprite (the one which will be rotated) we need this to avoid out of memory errors from pygame
         self.sprite = self._sprite
 
-        # TODO: A CHANGER -------------------------------------------------------------
         self.position = start_position.copy()
 
         self.angle = Car.DEFAULT_ANGLE
