@@ -11,7 +11,7 @@ import pygame
 class CarAI:
 
     TOTAL_GENERATIONS = 0
-    TIME_LIMIT = 10
+    TIME_LIMIT = 15
 
     def __init__(self, genomes: neat.DefaultGenome, config: neat.Config, start_position: list):
         CarAI.TOTAL_GENERATIONS += 1
