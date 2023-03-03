@@ -38,7 +38,7 @@ class Engine:
         self.ai_can_start = False
         self.instructions = [
             "Left click to draw a black line, right click to draw a white line. Once you are done drawing, press SPACE to go to the next step.",
-            "Use the directional arrows to rotate. Click to place. Once you've placed the start point, the AI will automatically start running.",
+            "Use the directional arrows to rotate. Click to place. CTRL + Z to go back to drawing. Once you've placed the start point, the AI will automatically start running.",
         ]
         self.instruction_index = 0
         self.tmp_screen = None
@@ -90,6 +90,14 @@ class Engine:
                             self.is_placing_start_point = True
                             self.instruction_index += 1
                             self.tmp_screen = self.screen.copy()
+                            
+                # Handle CTRL + Z when placing start point
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_z and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                        if self.is_placing_start_point:
+                            self.is_placing_start_point = False
+                            self.instruction_index -= 1
+                            self.is_drawing_track = True
      
             # Draw instructions
             self.draw_instructions()
