@@ -2,7 +2,7 @@
 
 ## 📝 Description
 
-Neat cars allows you to draw a track, a starting point and then let the magic happen. The cars will drive themselves and constantly improve their driving skills. The project is based on an evolutionary algorithm called [NEAT (NeuroEvolution of Augmenting Topologies)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies).
+Neat cars allows you to draw a track, a starting point and then let the magic happen. The cars will drive themselves and constantly improve their driving skills. The project is based on a genetic algorithm called [NEAT (NeuroEvolution of Augmenting Topologies)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies).
 
 ## 🎥 Demo
 
@@ -44,7 +44,7 @@ Instructions are displayed in the window's title.
 
 You can also see the stats of the current generation in the title...
 
-![title2](https://i.imgur.com/foaowFK.png)
+![title2](https://i.imgur.com/dJigMyt.png)
 
 ...and the full stats inside the console.
 
