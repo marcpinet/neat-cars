@@ -161,7 +161,8 @@ class Engine:
                 break
 
             # Refresh counter to exit after CarAI.TIME_LIMIT seconds
-            if time.time() - timer > CarAI.TIME_LIMIT:
+            time_left = time.time() - timer
+            if time_left > CarAI.TIME_LIMIT:
                 break
 
             # Draw the track and cars which are still alive
@@ -172,7 +173,8 @@ class Engine:
             # Refresh and show informations
             t = "Generation: " + str(car_ai.TOTAL_GENERATIONS)
             t2 = "Still Alive: " + str(car_ai.remaining_cars)
-            pygame.display.set_caption(self.title + " - " + t + " - " + t2)
+            t3 = "Time Left: " + str(round(CarAI.TIME_LIMIT - time_left, 2)) + "s"
+            pygame.display.set_caption(self.title + " - " + t + " - " + t2 + " - " + t3)
 
             # Update the screen
             self.update()
