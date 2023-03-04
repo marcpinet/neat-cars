@@ -50,8 +50,8 @@ You can also see the stats of the current generation in the title...
 
 ![cli_output](readme_data/cli_output.png)
 
-Feel free to tweak the parameters inside the `ai/config.txt` but also the static variables inside the `Car`, `Car_AI` and `Engine` classes.
-For example, you can disable the rendering if the car's sensors by setting `DRAW_SENSORS` to `False` in the `Car` class.
+Feel free to tweak the parameters inside the `ai/config.txt` but also the static variables inside the `Car`, `CarAI` and `Engine` classes.
+For example, you can disable the rendering of the car's sensors by setting `DRAW_SENSORS` to `False` in the `Car` class.
 
 ## ⚙️ How the AI works
 
