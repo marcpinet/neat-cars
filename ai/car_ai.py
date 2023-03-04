@@ -45,22 +45,19 @@ class CarAI:
 
             # 0: Left
             if choice == 0:
-                car.angle -= Car.ANGLE_INCREMENT
+                car.turn_left()
 
             # 1: Right
             elif choice == 1:
-                car.angle += Car.ANGLE_INCREMENT
+                car.turn_right()
 
             # 2: Accelerate
             elif choice == 2:
-                car.speed += Car.SPEED_INCREMENT
+                car.accelerate()
 
             # 3: Brake
             elif choice == 3:
-                if car.speed > Car.MINIMUM_SPEED:  # We don't want to go backwards nor going too slow
-                    car.speed -= Car.SPEED_INCREMENT
-                else:  # If we are going too slow, we accelerate ; that's greedy but it forces the car to maintain a constant speed
-                    car.speed += Car.SPEED_INCREMENT
+                car.brake()
 
         # Refresh cars sprites, number of cars which are still alive and update their fitness
         self.remaining_cars = sum(1 for car in self.cars if car.alive)

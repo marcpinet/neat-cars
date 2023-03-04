@@ -58,8 +58,10 @@ class Car:
 
         self.sensors = []
         self.alive = True
-        self.driven_distance = 0
         self.has_been_rendered_as_dead = False
+        
+        self.driven_distance = 0
+        self.malus = 0
 
     def draw(self, track: pygame.Surface) -> None:
         """Draw the car on the track (and its sensors if enabled)
@@ -232,4 +234,24 @@ class Car:
             float: The decided reward
         """
         # The reward has been decided to be the driven distance so the car will try to drive as far as possible
-        return self.driven_distance
+        return self.driven_distance - self.malus
+    
+    def accelerate(self) -> None:
+        """Accelerate the car"""
+        self.speed += Car.SPEED_INCREMENT
+
+    def brake(self) -> None:
+        """Brake the car"""
+        if self.speed > Car.MINIMUM_SPEED:  # We don't want to go backwards nor going too slow
+            self.speed -= Car.SPEED_INCREMENT
+        else:  
+            self.speed = Car.MINIMUM_SPEED
+            self.malus += 1  # Malus for going too slow
+        
+    def turn_left(self) -> None:
+        """Turn the car to the left"""
+        self.angle += Car.ANGLE_INCREMENT
+        
+    def turn_right(self) -> None:
+        """Turn the car to the right"""
+        self.angle -= Car.ANGLE_INCREMENT
