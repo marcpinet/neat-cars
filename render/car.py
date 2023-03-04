@@ -87,7 +87,7 @@ class Car:
                 position = sensor[0]
                 pygame.draw.line(track, Color.GREEN,
                                  self.center, position, 2)
-                pygame.draw.circle(track, Color.RED, position, 5)
+                pygame.draw.circle(track, Color.RED, position, 4)
 
     def check_collision(self, track: pygame.Surface) -> bool:
         """Check if the car is colliding with the track (by using a color system)
