@@ -6,13 +6,14 @@ Neat cars allows you to draw a track, a starting point and then let the magic ha
 
 ## 🎥 Demo
 
-### Track 1
+### Track 1: With sensors - Infinite track
 
-https://user-images.githubusercontent.com/52708150/222574922-a3c87cc1-4c62-4ef6-8fbf-e140916e2571.mp4
+https://user-images.githubusercontent.com/52708150/222992192-b399998d-5994-496e-8fcc-a8334f2ccb5c.mp4
 
-### Track 2
+### Track 2: Without sensors - Finite track
 
-https://user-images.githubusercontent.com/52708150/222576430-46c42039-3349-4336-80d0-2ad643bdf972.mp4
+https://user-images.githubusercontent.com/52708150/222992191-d2a2cb77-198b-422c-91ed-34f4fcd5b9f0.mp4
+
 
 ## 💡 How to use
 
