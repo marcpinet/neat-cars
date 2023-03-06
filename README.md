@@ -6,6 +6,10 @@ Neat cars allows you to draw a track, a starting point and then let the magic ha
 
 ## 🎥 Demo
 
+### Live neural network in the top left corner
+
+![demo](readme_data/nn.gif)
+
 ### Track 1: With sensors - Infinite track
 
 https://user-images.githubusercontent.com/52708150/223087114-7d4e0401-bb33-46fd-9673-bd973de7235f.mp4
