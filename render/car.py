@@ -17,6 +17,12 @@ DEAD_CAR_SPRITE_PATH = "assets/dead_car.png"
 # ------------------ CLASSES ------------------
 
 
+class Action:
+    TURN_LEFT = 0
+    TURN_RIGHT = 1
+    ACCELERATE = 2
+    BRAKE = 3
+
 class Car:
 
     CAR_SIZE_X = 60
@@ -234,7 +240,8 @@ class Car:
             float: The decided reward
         """
         # The reward has been decided to be the driven distance so the car will try to drive as far as possible
-        return self.driven_distance - self.malus
+        # Make it more human readable
+        return (self.driven_distance - self.malus) / 10000
     
     def accelerate(self) -> None:
         """Accelerate the car"""

@@ -188,12 +188,17 @@ class Engine:
             self.screen.blit(self.track, (0, 0))
             for car in car_ai.cars:
                 car.draw(self.screen)
+                
+            # Draw the best NN
+            if car_ai.best_nn is not None:
+                car_ai.best_nn.draw(self.screen)
 
             # Refresh and show informations
             t = "Generation: " + str(car_ai.TOTAL_GENERATIONS)
             t2 = "Still Alive: " + str(car_ai.remaining_cars)
             t3 = "Time Left: " + str(round(CarAI.TIME_LIMIT - time_left, 2)) + "s"
-            pygame.display.set_caption(self.title + " - " + t + " - " + t2 + " - " + t3)
+            t4 = "Best Fitness: " + str(round(car_ai.best_fitness))
+            pygame.display.set_caption(self.title + " - " + t + " - " + t2 + " - " + t3 + " - " + t4)
 
             # Update the screen
             self.update()

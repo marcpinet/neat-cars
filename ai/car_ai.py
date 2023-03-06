@@ -2,7 +2,8 @@
 
 
 import neat
-from render.car import Car
+from render.car import Car, Action
+from render.neural_network.nn import NN
 import pygame
 
 
@@ -11,13 +12,17 @@ import pygame
 class CarAI:
 
     TOTAL_GENERATIONS = 0
-    TIME_LIMIT = 15
+    TIME_LIMIT = 7
 
     def __init__(self, genomes: neat.DefaultGenome, config: neat.Config, start_position: list):
         CarAI.TOTAL_GENERATIONS += 1
 
         self.cars = []
         self.nets = []
+        
+        self.best_fitness = 0
+        self.nns = []
+        self.best_nn = None
 
         # We create a neural network for every given genome
         for _, genome in genomes:
@@ -25,8 +30,12 @@ class CarAI:
             self.nets.append(net)
             genome.fitness = 0
             self.cars.append(Car(start_position))
+            self.nns.append(NN(config, genome, (60, 130)))
 
         self.remaining_cars = len(self.cars)
+        self.best_nn = None
+        self.best_genome = None
+        self.best_input = None
 
     def compute(self, genomes: neat.DefaultGenome, track: pygame.Surface) -> None:
         """Compute the next move of every car and update their fitness
@@ -36,28 +45,38 @@ class CarAI:
             track (pygame.Surface): The track on which the car is being drawn
             width (int): The width of the window
         """
+        i = 0
         for car, net in zip(self.cars, self.nets):
+            
+            car_data = car.get_data()
 
             # Activate the neural network and get the output
-            output = net.activate(car.get_data())
+            output = net.activate(car_data)
             # Output gets treated and the car is updated in the next lines
             choice = output.index(max(output))
+            
+            # Refreshing nodes of all neural networks
+            for node in self.nns[i].nodes:
+                node.best_inputs = car_data
+                node.best_outputs = output
 
             # 0: Left
-            if choice == 0:
+            if choice == Action.TURN_LEFT:
                 car.turn_left()
 
             # 1: Right
-            elif choice == 1:
+            elif choice == Action.TURN_RIGHT:
                 car.turn_right()
 
             # 2: Accelerate
-            elif choice == 2:
+            elif choice == Action.ACCELERATE:
                 car.accelerate()
 
             # 3: Brake
-            elif choice == 3:
+            elif choice == Action.BRAKE:
                 car.brake()
+                
+            i += 1
 
         # Refresh cars sprites, number of cars which are still alive and update their fitness
         self.remaining_cars = sum(1 for car in self.cars if car.alive)
@@ -68,3 +87,6 @@ class CarAI:
             if car.alive:
                 car.update_sprite(track)
                 genomes[i][1].fitness += car.get_reward()
+                if genomes[i][1].fitness > self.best_fitness:
+                    self.best_fitness = genomes[i][1].fitness
+                    self.best_nn = self.nns[i]
