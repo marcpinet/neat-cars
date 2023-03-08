@@ -16,6 +16,8 @@ class CarAI:
 
     def __init__(self, genomes: neat.DefaultGenome, config: neat.Config, start_position: list):
         CarAI.TOTAL_GENERATIONS += 1
+        
+        self.genomes = genomes
 
         self.cars = []
         self.nets = []
@@ -34,10 +36,9 @@ class CarAI:
 
         self.remaining_cars = len(self.cars)
         self.best_nn = None
-        self.best_genome = None
         self.best_input = None
 
-    def compute(self, genomes: neat.DefaultGenome, track: pygame.Surface) -> None:
+    def compute(self, track: pygame.Surface) -> None:
         """Compute the next move of every car and update their fitness
 
         Args:
@@ -50,15 +51,16 @@ class CarAI:
             
             car_data = car.get_data()
 
-            # Activate the neural network and get the output
+            # Activate the neural network and get the output from the car_data (input)
             output = net.activate(car_data)
+            
             # Output gets treated and the car is updated in the next lines
             choice = output.index(max(output))
             
             # Refreshing nodes of all neural networks
             for node in self.nns[i].nodes:
-                node.best_inputs = car_data
-                node.best_outputs = output
+                node.inputs = car_data
+                node.output = choice
 
             # 0: Left
             if choice == Action.TURN_LEFT:
@@ -86,7 +88,7 @@ class CarAI:
         for i, car in enumerate(self.cars):
             if car.alive:
                 car.update_sprite(track)
-                genomes[i][1].fitness += car.get_reward()
-                if genomes[i][1].fitness > self.best_fitness:
-                    self.best_fitness = genomes[i][1].fitness
+                self.genomes[i][1].fitness += car.get_reward()
+                if self.genomes[i][1].fitness > self.best_fitness:
+                    self.best_fitness = self.genomes[i][1].fitness
                     self.best_nn = self.nns[i]

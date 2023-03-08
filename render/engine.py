@@ -173,7 +173,7 @@ class Engine:
                     exit()
 
             # Compute the next generation
-            car_ai.compute(genomes, self.track)
+            car_ai.compute(self.track)
 
             # Break if all cars are dead
             if car_ai.remaining_cars == 0:

@@ -3,8 +3,6 @@
 
 import pygame
 from render.colors import Color
-from render.car import Action
-
 
 # ------------------ GLOBAL VARIABLES ------------------
 
@@ -13,19 +11,6 @@ pygame.font.init()
 
 
 # ------------------ CLASSES AND FUNCTIONS ------------------
-
-
-def decode(best_outputs: list, index: int) -> bool:
-    if index == Action.TURN_LEFT and best_outputs[Action.TURN_LEFT] > best_outputs[Action.TURN_RIGHT]:
-        return True
-    elif index == Action.TURN_RIGHT and best_outputs[Action.TURN_RIGHT] > best_outputs[Action.TURN_LEFT]:
-        return True
-    elif index == Action.ACCELERATE and best_outputs[Action.ACCELERATE] > best_outputs[Action.BRAKE]:
-        return True
-    elif index == Action.BRAKE and best_outputs[Action.BRAKE] > best_outputs[Action.ACCELERATE]:
-        return True
-
-    return False
 
 
 class NodeType:
@@ -49,8 +34,8 @@ class Node:
         self.colors = colors
         self.label = label
         self.index = index
-        self.best_inputs = [0, 0, 0, 0, 0]
-        self.best_outputs = [0, 0, 0, 0]
+        self.inputs = [0, 0, 0, 0, 0]
+        self.output = None
 
     def draw(self, screen: pygame.Surface):
 
@@ -68,10 +53,10 @@ class Node:
 
     def get_color(self):
         if self.type == NodeType.INPUT:
-            v = self.best_inputs[self.index]
+            v = self.inputs[self.index]
             ratio = 1 - (min(v / 100, 1))
         elif self.type == NodeType.OUTPUT:
-            ratio = 1 if decode(self.best_outputs, self.index) else 0
+            ratio = 1 if self.index == self.output else 0
         else:
             ratio = 0
 

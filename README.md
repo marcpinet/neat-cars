@@ -18,8 +18,6 @@ https://user-images.githubusercontent.com/52708150/223087114-7d4e0401-bb33-46fd-
 
 https://user-images.githubusercontent.com/52708150/223087098-0bd16d36-cef2-4773-b657-5471fa1f5baa.mp4
 
-
-
 ## 💡 How to use
 
 ### Prerequisites
