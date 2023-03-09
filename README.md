@@ -8,7 +8,7 @@ Neat cars allows you to draw a track, a starting point and then let the magic ha
 
 ### Live neural network in the top left corner
 
-![demo](readme_data/nn.gif)
+![demo](readme-data/nn.gif)
 
 ### Track 1: With sensors - Infinite track
 
@@ -44,15 +44,15 @@ After that, you can proceed to start the program by running `main.py`.
 
 Instructions are displayed in the window's title.
 
-![title](readme_data/title1.png)
+![title](readme-data/title1.png)
 
 You can also see the stats of the current generation in the title...
 
-![title2](readme_data/title2.png)
+![title2](readme-data/title2.png)
 
 ...and the full stats inside the console.
 
-![cli_output](readme_data/cli_output.png)
+![cli_output](readme-data/cli_output.png)
 
 Feel free to tweak the parameters inside the `ai/config.txt` but also the static variables inside the `Car`, `CarAI` and `Engine` classes.
 For example, you can disable the rendering of the car's sensors by setting `DRAW_SENSORS` to `False` in the `Car` class.
@@ -61,7 +61,7 @@ For example, you can disable the rendering of the car's sensors by setting `DRAW
 
 The neural network is trained using the NEAT algorithm. The NEAT algorithm is a genetic algorithm which evolves over time from a basic neural network to a more advanced and complex one *depending on your fitness function* by going further and further. Check the [neat-python documentation](https://neat-python.readthedocs.io/en/latest/neat_overview.html) for more infos.
 
-![neat](readme_data/neat_example.gif)
+![neat](readme-data/neat_example.gif)
 
 Also, you can find the full mathematic approach and details directly in the [NEAT paper](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf).
 
@@ -75,7 +75,7 @@ The main informations the car will use to drive are the distance to the walls in
 
 The sensors are represented by a green line in the rendering. Red means the sensor is detecting a wall.
 
-[![inputs](readme_data/car_sensors.png)](https://marcpinet.me)
+[![inputs](readme-data/car_sensors.png)](https://marcpinet.me)
 
 ### Outputs
 
@@ -90,7 +90,7 @@ Note that we have a minimum speed to respect so that the car doesn't stop comple
 
 We get, as a starting point for our neural network, something like this:
 
-![nn](readme_data/neat_cars_init.png)
+![nn](readme-data/neat_cars_init.png)
 
 ### Fitness
 
