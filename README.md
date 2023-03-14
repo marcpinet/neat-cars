@@ -95,6 +95,8 @@ We get, as a starting point for our neural network, something like this:
 
 ![nn](readme-data/neat_cars_init.png)
 
+The algorithm will then create itself the necessary connections (increasing their weight over time) and eventually add hidden layers in the process.
+
 ### Fitness
 
 The fitness is quite simple: the more the car drives, the better it is. The fitness is calculated by the distance the car has driven. The car is therefore penalized if it crashes.
