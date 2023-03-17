@@ -8,7 +8,7 @@ from render.engine import Engine
 
 
 NEAT_CONFIG_PATH = "ai/config.txt"
-DEBUG = True
+RAY_CAST = True
 MAX_SIMULATIONS = 1000
 
 
@@ -16,7 +16,7 @@ MAX_SIMULATIONS = 1000
 
 
 def main() -> None:
-    window = Engine(NEAT_CONFIG_PATH, DEBUG, MAX_SIMULATIONS)
+    window = Engine(NEAT_CONFIG_PATH, RAY_CAST, MAX_SIMULATIONS)
     window.run()
 
 
