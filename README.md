@@ -103,7 +103,7 @@ The fitness is quite simple: the more the car drives, the better it is. The fitn
 
 ## 🐛 Known issues
 
-* The cars can get stuck in an infinite turn (the algorithm will still fixes itself while evolving tho)
+* Nothing yet!
 
 ## 🥅 TO-DO List
 
