@@ -108,7 +108,6 @@ The fitness is quite simple: the more the car drives, the better it is. The fitn
 ## 🥅 TO-DO List
 
 * Find a way to allow 8-like tracks
-* Make the reward system more complex
 * Make a detailed article at [marcpinet.me](https://marcpinet.me)
 
 ## ✍️ Authors

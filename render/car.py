@@ -67,7 +67,7 @@ class Car:
         self.has_been_rendered_as_dead = False
         
         self.driven_distance = 0
-        self.malus = 0
+        self.speed_penalty = 0
 
     def draw(self, track: pygame.Surface) -> None:
         """Draw the car on the track (and its sensors if enabled)
@@ -234,14 +234,28 @@ class Car:
         return distances
 
     def get_reward(self) -> float:
-        """Get the reward of the car
-
-        Returns:
-            float: The decided reward
         """
-        # The reward has been decided to be the driven distance so the car will try to drive as far as possible
-        # Make it more human readable
-        return (self.driven_distance - self.malus) / 10000
+        Get the reward of the car based on multiple factors such as:
+        - Driven distance: Encourages the car to go farther
+        - Speed: Encourages the car to maintain a reasonable speed
+        - Malus: Penalizes the car for going too slow or taking unwanted actions
+        Returns:
+            float: The calculated reward
+        """
+
+        # Reward for distance driven
+        distance_reward = self.driven_distance / 10000
+
+        MAX_EXPECTED_SPEED = 5000
+        speed_reward = (self.speed / MAX_EXPECTED_SPEED) ** 0.5  # Square root to apply diminishing returns
+
+        malus = self.speed_penalty / 100
+
+        # Calculate the final reward
+        final_reward = distance_reward + speed_reward - malus
+
+        return final_reward
+
     
     def accelerate(self) -> None:
         """Accelerate the car"""
@@ -253,7 +267,7 @@ class Car:
             self.speed -= Car.SPEED_INCREMENT
         else:  
             self.speed = Car.MINIMUM_SPEED
-            self.malus += 1  # Malus for going too slow
+            self.speed_penalty += 1  # speed_penalty for going too slow
         
     def turn_left(self) -> None:
         """Turn the car to the left"""
