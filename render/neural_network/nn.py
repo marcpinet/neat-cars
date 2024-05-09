@@ -51,8 +51,18 @@ class NN:
         for c in genome.connections.values():
             if c.enabled:
                 input_, output = c.key
-                self.connections.append(Connection(self.nodes[node_id_list.index(
-                    input_)], self.nodes[node_id_list.index(output)], c.weight))
+                
+                # Vérifier si le nœud d'entrée est connecté à un neurone caché
+                if self.nodes[node_id_list.index(input_)].type == NodeType.INPUT and self.nodes[node_id_list.index(output)].type == NodeType.HIDDEN:
+                    self.connections.append(Connection(self.nodes[node_id_list.index(input_)], self.nodes[node_id_list.index(output)], c.weight))
+                
+                # Vérifier si le neurone caché est connecté à un nœud de sortie
+                elif self.nodes[node_id_list.index(input_)].type == NodeType.HIDDEN and self.nodes[node_id_list.index(output)].type == NodeType.OUTPUT:
+                    self.connections.append(Connection(self.nodes[node_id_list.index(input_)], self.nodes[node_id_list.index(output)], c.weight))
+                
+                # Vérifier si le nœud d'entrée est directement connecté à un nœud de sortie
+                elif self.nodes[node_id_list.index(input_)].type == NodeType.INPUT and self.nodes[node_id_list.index(output)].type == NodeType.OUTPUT:
+                    self.connections.append(Connection(self.nodes[node_id_list.index(input_)], self.nodes[node_id_list.index(output)], c.weight))
 
     def draw(self, screen: pygame.Surface):
         for c in self.connections:
