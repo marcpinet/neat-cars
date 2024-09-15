@@ -3,208 +3,187 @@
 
 import pygame
 import neat
+import time
+import numpy as np
+from typing import Tuple, List
 from ai.car_ai import CarAI
 from render.car import Car
-import time
 from render.colors import Color
+
 
 
 # ------------------ CLASSES ------------------
 
 
-class Engine:
+class Track:
+    def __init__(self, width: int, height: int):
+        self.surface = pygame.Surface((width, height))
+        self.surface.fill(Color.WHITE)
+        self.brush_size = 50
+        self.last_position = None
 
+    def draw(self, position: Tuple[int, int], color: Tuple[int, int, int]):
+        if self.last_position:
+            self.draw_interpolated(self.last_position, position, color)
+        else:
+            pygame.draw.circle(self.surface, color, position, self.brush_size)
+        self.last_position = position
+
+    def draw_interpolated(self, start: Tuple[int, int], end: Tuple[int, int], color: Tuple[int, int, int]):
+        dx = end[0] - start[0]
+        dy = end[1] - start[1]
+        distance = max(abs(dx), abs(dy))
+        
+        for i in range(distance):
+            x = int(start[0] + float(i) / distance * dx)
+            y = int(start[1] + float(i) / distance * dy)
+            pygame.draw.circle(self.surface, color, (x, y), self.brush_size)
+
+    def reset_last_position(self):
+        self.last_position = None
+
+    def get_surface(self) -> pygame.Surface:
+        return self.surface
+
+
+class Engine:
     WIDTH = 1900
     HEIGHT = 950
     FPS = 60
-    
     DEFAULT_FONT = "comicsansms"
-    
-    BRUSH_SIZE = 50
 
-    def __init__(self, NEAT_CONFIG_PATH, DEBUG, MAX_SIMULATIONS):
-        self.NEAT_CONFIG_PATH = NEAT_CONFIG_PATH
-        self.DEBUG = DEBUG
-        self.MAX_SIMULATIONS = MAX_SIMULATIONS
+    def __init__(self, neat_config_path: str, debug: bool, max_simulations: int):
+        self.neat_config_path = neat_config_path
+        self.debug = debug
+        self.max_simulations = max_simulations
         self.title = "Neat Cars"
+        
+        pygame.init()
         pygame.display.set_caption(self.title)
-        self.screen = pygame.display.set_mode((Engine.WIDTH, Engine.HEIGHT))
-        self.screen.fill(Color.WHITE)  # Fill screen with white
-        self.is_running = False
+        self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.clock = pygame.time.Clock()
         
-        self.is_drawing_track = True
-        self.is_placing_start_point = False
-        self.ai_can_start = False
-        self.instructions = [
-            "Left click to draw a black line, right click to draw a white line. Mouse wheel to adjust brush size. Once you are done drawing, press SPACE to go to the next step.",
-            "Use the directional arrows to rotate. Click to place. CTRL + Z to go back to drawing. Once you've placed the start point, the AI will automatically start running.",
-        ]
-        self.instruction_index = 0
-        self.tmp_screen = None
-        self.track = None
+        self.track = Track(self.WIDTH, self.HEIGHT)
         self.car = Car([0, 0])
         self.decided_car_pos = None
         
-    def handle_drawing_track(self):
-        """Handles the drawing of the track"""
-        if(pygame.mouse.get_pressed()[0]):
-            pygame.draw.circle(self.screen, Color.BLACK, pygame.mouse.get_pos(), Engine.BRUSH_SIZE)
-        elif pygame.mouse.get_pressed()[2]:
-            pygame.draw.circle(self.screen, Color.WHITE, pygame.mouse.get_pos(), Engine.BRUSH_SIZE)
-            
-    def draw_instructions(self):
-        """Draws the instructions on the title's screen"""
-        pygame.display.set_caption(self.title + " - " + self.instructions[self.instruction_index])
-        
-    def handle_placing_start_point(self):
-        """Handles the placing of the start point"""
-        # Car sprite follows mouse until left click
-        if not pygame.mouse.get_pressed()[0]:
-            self.car.position[0] = pygame.mouse.get_pos()[0] - Car.CAR_SIZE_X / 2
-            self.car.position[1] = pygame.mouse.get_pos()[1] - Car.CAR_SIZE_Y / 2
-            self.screen.blit(self.car.sprite, (self.car.position[0], self.car.position[1]))
-        
-        # Once left click is pressed, the car is placed and the AI can start
-        else:
-            self.ai_can_start = True
-            self.is_placing_start_point = False
-            self.track = self.screen.copy()
-            self.screen.blit(self.car.sprite, (self.car.center[0], self.car.center[1]))
-            self.decided_car_pos = [self.car.position[0], self.car.position[1]]
-        
-    def run(self) -> None:
-        self.running = True
-        while self.running:
-            
-            # Events handling
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit()
-                
-                # Handle space bar
-                if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_SPACE:
-                        if self.instruction_index == 0:
-                            self.is_drawing_track = False
-                            self.is_placing_start_point = True
-                            self.instruction_index += 1
-                            self.tmp_screen = self.screen.copy()
-                            
-                # Handle CTRL + Z when placing start point
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_z and pygame.key.get_mods() & pygame.KMOD_CTRL:
-                        if self.is_placing_start_point:
-                            self.is_placing_start_point = False
-                            self.instruction_index -= 1
-                            self.is_drawing_track = True
+        self.state = "drawing_track"
+        self.instructions = [
+            "Left click to draw a black line, right click to draw a white line. Mouse wheel to adjust brush size. Press SPACE when done.",
+            "Use arrow keys to rotate. Click to place. CTRL + Z to go back. AI starts after placing."
+        ]
+        self.instruction_index = 0
 
-                # Handle scroll brush size
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 4:
-                        # Ensure doesn't go above 100
-                        if Engine.BRUSH_SIZE < 100:
-                            Engine.BRUSH_SIZE += 1
-                    elif event.button == 5:
-                        # Ensure doesn't go below 1
-                        if Engine.BRUSH_SIZE > 10:
-                            Engine.BRUSH_SIZE -= 1
-     
-            # Draw instructions
-            self.draw_instructions()
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
             
-            # Drawing track
-            if self.is_drawing_track:
-                self.handle_drawing_track()
-                
-            if self.is_placing_start_point:
-                self.handle_placing_start_point()
-            
-            # AI
-            if self.ai_can_start:
-                self.start_ai()
-            
-            # Update
-            self.update()
-            
-    def start_ai(self):
-        """Starts the AI"""
+            if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+                if self.state == "drawing_track":
+                    self.state = "placing_start_point"
+                    self.instruction_index = 1
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_z and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    if self.state == "placing_start_point":
+                        self.state = "drawing_track"
+                        self.instruction_index = 0
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 4:
+                    self.track.adjust_brush_size(1)
+                elif event.button == 5:
+                    self.track.adjust_brush_size(-1)
+
+        return True
+
+    def handle_drawing_track(self):
+        if pygame.mouse.get_pressed()[0]:
+            self.track.draw(pygame.mouse.get_pos(), Color.BLACK)
+        elif pygame.mouse.get_pressed()[2]:
+            self.track.draw(pygame.mouse.get_pos(), Color.WHITE)
+        else:
+            self.track.reset_last_position()
+
+    def handle_placing_start_point(self):
+        if not pygame.mouse.get_pressed()[0]:
+            self.car.position = [
+                pygame.mouse.get_pos()[0] - Car.CAR_SIZE_X / 2,
+                pygame.mouse.get_pos()[1] - Car.CAR_SIZE_Y / 2
+            ]
+        else:
+            self.state = "ai_running"
+            self.decided_car_pos = self.car.position.copy()
+
+    def draw(self):
+        self.screen.blit(self.track.get_surface(), (0, 0))
+        if self.state == "placing_start_point" or self.state == "ai_running":
+            self.screen.blit(self.car.sprite, self.car.position)
         
-        # Load neat config file
+        pygame.display.set_caption(f"{self.title} - {self.instructions[self.instruction_index]}")
+        pygame.display.update()
+
+    def start_ai(self):
         config = neat.config.Config(
             neat.DefaultGenome,
             neat.DefaultReproduction,
             neat.DefaultSpeciesSet,
             neat.DefaultStagnation,
-            self.NEAT_CONFIG_PATH
+            self.neat_config_path
         )
 
-        # Create population
         population = neat.Population(config)
 
-        # Add reporters if debug is enabled
-        if self.DEBUG:
+        if self.debug:
             population.add_reporter(neat.StdOutReporter(True))
             population.add_reporter(neat.StatisticsReporter())
 
-        # Run simulation for MAX_SIMULATION generations
-        population.run(self.run_simulation, self.MAX_SIMULATIONS)
-        
+        population.run(self.run_simulation, self.max_simulations)
 
-    def run_simulation(self, genomes: neat.DefaultGenome, config: neat.Config) -> None:
-        """Run the simulation (evolutionarily)
-
-        Args:
-            genomes (neat.DefaultGenome): The genomes of the population
-            config (neat.Config): The neat configuration
-        """
-
-        # Initialize CarAI
+    def run_simulation(self, genomes: List[neat.DefaultGenome], config: neat.Config) -> None:
         car_ai = CarAI(genomes, config, self.decided_car_pos)
-        
-        # Start timer
         timer = time.time()
 
-        self.is_running = True
-        while self.is_running:
-            # Events handler
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit()
+        while True:
+            if not self.handle_events():
+                return
 
-            # Compute the next generation
-            car_ai.compute(self.track)
+            car_ai.compute(self.track.get_surface())
 
-            # Break if all cars are dead
-            if car_ai.remaining_cars == 0:
+            if car_ai.remaining_cars == 0 or time.time() - timer > CarAI.TIME_LIMIT:
                 break
 
-            # Refresh counter to exit after CarAI.TIME_LIMIT seconds
-            time_left = time.time() - timer
-            if time_left > CarAI.TIME_LIMIT:
-                break
-
-            # Draw the track and cars which are still alive
-            self.screen.blit(self.track, (0, 0))
+            self.screen.blit(self.track.get_surface(), (0, 0))
             for car in car_ai.cars:
                 car.draw(self.screen)
-                
-            # Draw the best NN
-            if car_ai.best_nn is not None:
+
+            if car_ai.best_nn:
                 car_ai.best_nn.draw(self.screen)
 
-            # Refresh and show informations
-            t = "Generation: " + str(car_ai.TOTAL_GENERATIONS)
-            t2 = "Still Alive: " + str(car_ai.remaining_cars)
-            t3 = "Time Left: " + str(round(CarAI.TIME_LIMIT - time_left, 2)) + "s"
-            t4 = "Best Fitness: " + str(round(car_ai.best_fitness))
-            pygame.display.set_caption(self.title + " - " + t + " - " + t2 + " - " + t3 + " - " + t4)
+            caption = (f"{self.title} - Generation: {car_ai.TOTAL_GENERATIONS} - "
+                       f"Alive: {car_ai.remaining_cars} - "
+                       f"Time Left: {round(CarAI.TIME_LIMIT - (time.time() - timer), 2)}s - "
+                       f"Best Fitness: {round(car_ai.best_fitness)}")
+            pygame.display.set_caption(caption)
 
-            # Update the screen
-            self.update()
-            self.clock.tick(Engine.FPS)
+            pygame.display.update()
+            self.clock.tick(self.FPS)
 
-    def update(self):
-        pygame.display.update()
-        if self.is_placing_start_point:
-            self.screen.blit(self.tmp_screen, (0, 0))
+    def run(self):
+        while True:
+            if not self.handle_events():
+                break
+
+            if self.state == "drawing_track":
+                self.handle_drawing_track()
+            elif self.state == "placing_start_point":
+                self.handle_placing_start_point()
+            elif self.state == "ai_running":
+                self.start_ai()
+                break
+
+            self.draw()
+            self.clock.tick(self.FPS)
+
+        pygame.quit()
