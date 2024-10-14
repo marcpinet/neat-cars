@@ -4,7 +4,6 @@
 import pygame
 import math
 from render.colors import Color
-import numpy as np
 
 
 # ------------------ GLOBAL VARIABLES  ------------------

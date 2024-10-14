@@ -16,6 +16,9 @@ from render.colors import Color
 
 
 class Track:
+    
+    BRUSH_LIMIT_SIZE = 25
+    
     def __init__(self, width: int, height: int):
         self.surface = pygame.Surface((width, height))
         self.surface.fill(Color.WHITE)
@@ -28,6 +31,9 @@ class Track:
         else:
             pygame.draw.circle(self.surface, color, position, self.brush_size)
         self.last_position = position
+        
+    def adjust_brush_size(self, amount: int):
+        self.brush_size = max(Track.BRUSH_LIMIT_SIZE, self.brush_size + amount)
 
     def draw_interpolated(self, start: Tuple[int, int], end: Tuple[int, int], color: Tuple[int, int, int]):
         dx = end[0] - start[0]
@@ -97,7 +103,7 @@ class Engine:
                     self.track.adjust_brush_size(-1)
 
         return True
-
+    
     def handle_drawing_track(self):
         if pygame.mouse.get_pressed()[0]:
             self.track.draw(pygame.mouse.get_pos(), Color.BLACK)
