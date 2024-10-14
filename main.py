@@ -7,7 +7,7 @@ from render.engine import Engine
 # ------------------ GLOBAL VARIABLES ------------------
 
 
-NEAT_CONFIG_PATH = "ai/config.txt"
+NEAT_CONFIG_PATH = "neat_config.ini"
 RAY_CAST = True
 MAX_SIMULATIONS = 1000
 
