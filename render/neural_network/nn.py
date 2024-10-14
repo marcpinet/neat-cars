@@ -33,7 +33,7 @@ class NN:
 
         h = (NN.OUTPUT_NEURONS-1)*(Node.RADIUS*2 + Node.SPACING)
         for i, out in enumerate(config.genome_config.output_keys):
-            n = Node(out+NN.INPUT_NEURONS, pos[0] + 2*(Node.LAYER_SPACING+2*Node.RADIUS), pos[1]+int(-h/2 + i*(
+            n = Node(out, pos[0] + 2*(Node.LAYER_SPACING+2*Node.RADIUS), pos[1]+int(-h/2 + i*(
                 Node.RADIUS*2 + Node.SPACING)), NodeType.OUTPUT, [Color.RED_PALE, Color.RED, Color.DARK_RED_PALE, Color.DARK_RED], output_names[i], i)
             self.nodes.append(n)
             hidden_nodes.remove(out)
