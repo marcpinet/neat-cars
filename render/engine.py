@@ -83,7 +83,7 @@ class Engine:
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return False
+                exit(0)
             
             if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
                 if self.state == "drawing_track":
