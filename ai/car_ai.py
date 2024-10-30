@@ -2,9 +2,10 @@
 
 
 import neat
+import pygame
 from render.car import Car, Action
 from render.neural_network.nn import NN
-import pygame
+from render.track import Track
 
 
 # ------------------ CLASSES ------------------
@@ -14,7 +15,7 @@ class CarAI:
     TOTAL_GENERATIONS = 0
     TIME_LIMIT = 15
 
-    def __init__(self, genomes: neat.DefaultGenome, config: neat.Config, start_position: list):
+    def __init__(self, genomes: neat.DefaultGenome, config: neat.Config, start_position: list, track: Track):
         CarAI.TOTAL_GENERATIONS += 1
         
         self.genomes = genomes
@@ -31,7 +32,7 @@ class CarAI:
             net = neat.nn.FeedForwardNetwork.create(genome, config)
             self.nets.append(net)
             genome.fitness = 0
-            self.cars.append(Car(start_position))
+            self.cars.append(Car(start_position, track))
             self.nns.append(NN(config, genome, (60, 130)))
 
         self.remaining_cars = len(self.cars)

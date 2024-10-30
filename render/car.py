@@ -4,6 +4,7 @@
 import pygame
 import math
 from render.colors import Color
+from render.track import Track
 
 
 # ------------------ GLOBAL VARIABLES  ------------------
@@ -39,7 +40,7 @@ class Car:
     DRAW_SENSORS = True
     SENSORS_DRAW_DISTANCE = 1920
 
-    def __init__(self, start_position: list):
+    def __init__(self, start_position: list, track: Track):
         # The _sprite is the untouched sprite (not rotated) while the sprite is the one which will be moved around
         self._sprite = pygame.image.load(CAR_SPRITE_PATH).convert_alpha()
 
@@ -67,6 +68,15 @@ class Car:
         
         self.driven_distance = 0
         self.speed_penalty = 0
+        track_width = track.width
+        track_height = track.height
+        self.track_diagonal = math.sqrt(track_width**2 + track_height**2)
+        
+        self.DISTANCE_NORMALIZER = self.track_diagonal / 2
+        self.MAX_EXPECTED_SPEED = self.track_diagonal / 100
+        self.minimum_speed = self.CAR_SIZE_X / 6
+        self.angle_increment = math.degrees(math.atan2(self.CAR_SIZE_Y, self.speed * 10))
+        self.penalty_factor = self.track_diagonal / 1000
 
     def draw(self, track: pygame.Surface) -> None:
         """Draw the car on the track (and its sensors if enabled)
@@ -177,6 +187,13 @@ class Car:
         distance = int(math.hypot(x - self.center[0], y - self.center[1]))
         self.sensors.append([(x, y), distance])
 
+    def update_adaptive_parameters(self) -> None:
+        """Update the adaptive parameters of the car such as the angle increment, the minimum speed, etc."""
+        self.angle_increment = math.degrees(math.atan2(self.CAR_SIZE_Y, self.speed * 10))
+        
+        min_sensor_distance = min(sensor[1] for sensor in self.sensors) if self.sensors else self.CAR_SIZE_X
+        self.minimum_speed = max(self.CAR_SIZE_X / 6, min_sensor_distance / 20)
+
     def update_center(self) -> None:
         """Update the center of the car after a rotation (when it turns left or right)"""
         sprite_as_rect = self._sprite.get_rect()
@@ -205,7 +222,7 @@ class Car:
         self.position[1] += sin * self.speed
 
         # Update the driven distance with the speed
-        self.driven_distance += self.speed
+        self.update_adaptive_parameters()
 
         # Calculate Corners
         self.refresh_corners_positions()
@@ -242,17 +259,16 @@ class Car:
             float: The calculated reward
         """
 
-        # Reward for distance driven
-        distance_reward = self.driven_distance / 10000
-
-        MAX_EXPECTED_SPEED = 5000
-        speed_reward = (self.speed / MAX_EXPECTED_SPEED) ** 0.5  # Square root to apply diminishing returns
-
-        malus = self.speed_penalty / 100
-
-        # Calculate the final reward
-        final_reward = distance_reward + speed_reward - malus
-
+        distance_reward = self.driven_distance / self.DISTANCE_NORMALIZER
+        
+        speed_reward = (self.speed / self.MAX_EXPECTED_SPEED) ** 0.5
+        
+        malus = self.speed_penalty / self.penalty_factor
+        
+        progress_factor = min(1.0, self.driven_distance / (self.track_diagonal * 0.75))
+        
+        final_reward = (distance_reward + speed_reward - malus) * (1 + progress_factor)
+        
         return final_reward
 
     
@@ -266,7 +282,7 @@ class Car:
             self.speed -= Car.SPEED_INCREMENT
         else:  
             self.speed = Car.MINIMUM_SPEED
-            self.speed_penalty += 1  # speed_penalty for going too slow
+            self.speed_penalty += 1
         
     def turn_left(self) -> None:
         """Turn the car to the left"""

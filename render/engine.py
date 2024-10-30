@@ -9,47 +9,10 @@ from typing import Tuple, List
 from ai.car_ai import CarAI
 from render.car import Car
 from render.colors import Color
-
+from render.track import Track
 
 
 # ------------------ CLASSES ------------------
-
-
-class Track:
-    
-    BRUSH_LIMIT_SIZE = 25
-    
-    def __init__(self, width: int, height: int):
-        self.surface = pygame.Surface((width, height))
-        self.surface.fill(Color.WHITE)
-        self.brush_size = 50
-        self.last_position = None
-
-    def draw(self, position: Tuple[int, int], color: Tuple[int, int, int]):
-        if self.last_position:
-            self.draw_interpolated(self.last_position, position, color)
-        else:
-            pygame.draw.circle(self.surface, color, position, self.brush_size)
-        self.last_position = position
-        
-    def adjust_brush_size(self, amount: int):
-        self.brush_size = max(Track.BRUSH_LIMIT_SIZE, self.brush_size + amount)
-
-    def draw_interpolated(self, start: Tuple[int, int], end: Tuple[int, int], color: Tuple[int, int, int]):
-        dx = end[0] - start[0]
-        dy = end[1] - start[1]
-        distance = max(abs(dx), abs(dy))
-        
-        for i in range(distance):
-            x = int(start[0] + float(i) / distance * dx)
-            y = int(start[1] + float(i) / distance * dy)
-            pygame.draw.circle(self.surface, color, (x, y), self.brush_size)
-
-    def reset_last_position(self):
-        self.last_position = None
-
-    def get_surface(self) -> pygame.Surface:
-        return self.surface
 
 
 class Engine:
@@ -70,7 +33,7 @@ class Engine:
         self.clock = pygame.time.Clock()
         
         self.track = Track(self.WIDTH, self.HEIGHT)
-        self.car = Car([0, 0])
+        self.car = Car([0, 0], self.track)
         self.decided_car_pos = None
         
         self.state = "drawing_track"
@@ -148,7 +111,7 @@ class Engine:
         population.run(self.run_simulation, self.max_simulations)
 
     def run_simulation(self, genomes: List[neat.DefaultGenome], config: neat.Config) -> None:
-        car_ai = CarAI(genomes, config, self.decided_car_pos)
+        car_ai = CarAI(genomes, config, self.decided_car_pos, self.track)
         timer = time.time()
 
         while True:
